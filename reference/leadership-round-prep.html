@@ -9,12 +9,15 @@
   body { max-width: 760px; margin: 0 auto; padding: 0 1.5rem; }
   .stamp { font-family: var(--font-mono); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--fg-muted); }
   .story { background: var(--callout-bg); border-left: 4px solid var(--callout-rule); padding: 1.2rem 1.4rem; margin: 1.5rem 0; border-radius: 0 4px 4px 0; }
+  .story.lead { border-left-width: 6px; border-left-color: var(--accent); }
   .story h3 { margin-top: 0; }
   .story .use { font-size: 0.85rem; color: var(--fg-muted); font-style: italic; margin-top: 0.5rem; }
   .tag { display: inline-block; font-family: var(--font-mono); font-size: 0.7rem; background: var(--accent); color: white; padding: 0.1rem 0.45rem; border-radius: 3px; margin-right: 0.4rem; }
+  .tag.alt { background: var(--fg-muted); }
   ul.tight { margin: 0.5rem 0; }
   ul.tight li { margin-bottom: 0.15rem; }
   .danger { color: var(--accent); font-weight: 600; }
+  .lead-banner { background: var(--accent-soft); padding: 0.6rem 1rem; border-radius: 4px; font-family: var(--font-mono); font-size: 0.85rem; margin-bottom: 1.5rem; }
 </style>
 </head>
 <body>
@@ -25,7 +28,7 @@
     <span class="time">~15 min read · 60-90 min drill</span>
   </div>
   <h1>Leadership Round — Quick Prep</h1>
-  <p class="subtitle">Built from your actual resume. No personal projects needed.</p>
+  <p class="subtitle">5 stories, lead with Podeum. Built from your actual resume.</p>
 </header>
 
 <main>
@@ -41,24 +44,35 @@
 </section>
 
 <section>
-  <h2>Your 4 stories (drawn from your resume, not personal projects)</h2>
-  <p>Personal projects are hard to describe in a behavioral round because they lack the conflict, the team dynamics, and the organizational pressure. Resume work is better — it has all of those baked in. You have <strong>four strong stories</strong> sitting in your bullets. Pick one per question type. Memorize the beats, not the prose.</p>
+  <div class="lead-banner"><strong>Order matters.</strong> Lead with Podeum when the question is about end-to-end ownership, scope, or "tell me about a project you owned." Walmart work is strong for influence / SLOs / cross-team. Rakuten is the bridge story between founding eng and a large org.</div>
 
-  <div class="story">
-    <h3><span class="tag">SCOPE</span> Story 1: The Orkes integration end-to-end</h3>
-    <p><strong>Resume source:</strong> "Owned the end-to-end integration of Orkes Workflow Engine, enabling workflow-driven orchestration across backend and AI-powered systems."</p>
+  <h2>Your 5 stories (drawn from your resume, not personal projects)</h2>
+  <p>Personal projects are hard to describe in a behavioral round because they lack the conflict, the team dynamics, and the organizational pressure. Resume work is better — it has all of those baked in. You have <strong>five strong stories</strong> sitting in your bullets. Pick one per question type. Memorize the beats, not the prose.</p>
+
+  <div class="story lead">
+    <h3><span class="tag">LEAD STORY</span> <span class="tag alt">SCOPE / END-TO-END OWNERSHIP</span> Story 1: Podeum — founding engineer, 0 → 10k DAU, everything</h3>
+    <p><strong>Resume source:</strong> "Built and scaled backend services from scratch using Java, supporting growth from 0 to ~10,000 daily active users. Designed and implemented core platform systems including authentication, virtual economy, in-app purchases, and real-time live score feeds."</p>
+    <p><strong>Why this is the lead:</strong> This is the single highest-signal end-to-end ownership story you have. You were not handed scope — you picked it. You didn't have a manager drawing the architecture; you drew it. Auth, virtual economy, IAP, real-time feeds — these are four completely different systems with different consistency, latency, and correctness profiles. Building all four on a small team, with real users, in production, is exactly what Staff-level "operate in a fast-moving environment" looks like.</p>
     <p><strong>The story (beats, not words):</strong></p>
     <ul class="tight">
-      <li><strong>Situation:</strong> The platform needed workflow orchestration that could span backend services and the new AI systems. Off-the-shelf was not a fit because of multi-tenancy and our AI workflow shape.</li>
-      <li><strong>Task:</strong> I owned the integration end-to-end — SDK, config, runtime. No PM assigned this to me; I pitched it because I saw the gap between our backend workflow state and what the AI platform needed.</li>
-      <li><strong>Action:</strong> Defined the integration scope (what we adopt, what we wrap, what we reject). Built the SDK adapter layer so the rest of the team could consume it without knowing Orkes specifics. Drove the config model so multi-tenant boundaries were clean.</li>
-      <li><strong>Result:</strong> Workflows can now span backend and AI systems through one runtime. The team adopted it because I made the integration easier to use than the alternative, not because I mandated it.</li>
+      <li><strong>Situation:</strong> Early-stage startup, small team, no production backend. We were building the product live, with real users signing up. The constraint was: ship the system, keep it up, and grow it as users grew.</li>
+      <li><strong>Task:</strong> I owned the backend end-to-end. Not "the auth service" or "the payment service" — the whole thing. Auth, virtual economy, in-app purchases, real-time live score feeds. Different systems, different failure modes, different consistency needs. Pick the architecture, pick the boundaries, ship them.</li>
+      <li><strong>Action — explicit calls I made:</strong>
+        <ul class="tight">
+          <li><strong>Auth:</strong> Picked session-vs-token, designed the user model, set the password / OAuth flow. Owned the security review process because there was no one else to.</li>
+          <li><strong>Virtual economy:</strong> Designed the ledger. This is where "I had to be right about consistency" matters — virtual currency, in-app purchases, double-spend risk. Decided on transaction boundaries, idempotency, what gets logged for audit.</li>
+          <li><strong>In-app purchases:</strong> Integrated the platform billing APIs. Owned the reconciliation story — what happens when Apple's webhook fires but our DB write fails. The boring stuff nobody else is going to think about unless you do.</li>
+          <li><strong>Real-time live score feeds:</strong> Different shape — pub/sub or polling, latency target, fan-out strategy. Picked the design and owned the rollout.</li>
+        </ul>
+      </li>
+      <li><strong>Result:</strong> 0 to ~10K DAU live in production, on systems I designed and built. Multiple product surfaces running on the same backend. No separate platform team to hand off to — I was it.</li>
+      <li><strong>What this story proves (the Staff signal):</strong> Scope self-selection. Boundary-drawing under no management. Multiple systems in one role. Production judgment under user pressure. Comfort with being the entire backend.</li>
     </ul>
-    <p class="use"><strong>Use for:</strong> "Tell me about a project you led end-to-end" · "Tell me about a time you picked a problem" · "Tell me about a time you scoped something"</p>
+    <p class="use"><strong>Use for:</strong> "Tell me about a project you led end-to-end" · "Tell me about the most scope you've owned" · "Tell me about a time you were the whole team" · "Tell me about a high-growth environment" (this is the literal answer to the round's stated focus) · "Tell me about a time you picked the architecture"</p>
   </div>
 
   <div class="story">
-    <h3><span class="tag">INFLUENCE</span> Story 2: Performance optimization across the workflow platform</h3>
+    <h3><span class="tag">INFLUENCE</span> Story 2: Performance optimization across the workflow platform (Walmart)</h3>
     <p><strong>Resume source:</strong> "Led performance optimization of core Start and Update Workflow APIs, reducing P95 latency from ~200ms to ~130ms and scaling the platform to ~1500 synchronous workflow executions per second."</p>
     <p><strong>The story (beats):</strong></p>
     <ul class="tight">
@@ -71,7 +85,7 @@
   </div>
 
   <div class="story">
-    <h3><span class="tag">SCOPE / AMBIGUITY</span> Story 3: Multi-tenant onboarding architecture</h3>
+    <h3><span class="tag">SCOPE / AMBIGUITY</span> Story 3: Multi-tenant onboarding architecture (Walmart)</h3>
     <p><strong>Resume source:</strong> "Designed and implemented a multi-tenant onboarding architecture supporting multiple teams and multiple workflow engines per tenant within a shared cluster."</p>
     <p><strong>The story (beats):</strong></p>
     <ul class="tight">
@@ -84,16 +98,35 @@
   </div>
 
   <div class="story">
-    <h3><span class="tag">INFLUENCE / DEV PRODUCTIVITY</span> Story 4: AI-powered dev tooling + spec-driven dev</h3>
-    <p><strong>Resume source:</strong> "Built internal AI-powered developer tooling and introduced spec-driven development workflows using LLMs, improving engineering velocity and consistency across feature development."</p>
+    <h3><span class="tag">INTEGRATION / JUDGMENT</span> Story 4: Orkes integration end-to-end (Walmart)</h3>
+    <p><strong>Resume source:</strong> "Owned the end-to-end integration of Orkes Workflow Engine, enabling workflow-driven orchestration across backend and AI-powered systems, including SDK integration, configuration management, and runtime interoperability."</p>
     <p><strong>The story (beats):</strong></p>
     <ul class="tight">
-      <li><strong>Situation:</strong> I noticed the team was spending time on boilerplate and inconsistent code shapes. No one had a story for it; it was a slow tax on velocity.</li>
-      <li><strong>Task:</strong> I built internal tooling and introduced a workflow change. Not assigned — pitched it.</li>
-      <li><strong>Action:</strong> Built the first version of the AI tooling for my own work, then ran a small pilot with 2-3 teammates. Wrote a short doc on the spec-driven workflow: what changes, what's the before/after, what the opt-in is. Made it easy to try; made it easy to ignore.</li>
-      <li><strong>Result:</strong> Adopted across the team. Velocity improved (have a concrete number if you can — "X% reduction in PR cycle time" or similar). The "make it easy to try" framing is what made the adoption land.</li>
+      <li><strong>Situation:</strong> The platform needed workflow orchestration that could span backend services and the new AI systems. Off-the-shelf was not a fit because of multi-tenancy and our AI workflow shape.</li>
+      <li><strong>Task:</strong> I owned the integration end-to-end — SDK, config, runtime. No PM assigned this to me; I pitched it because I saw the gap between our backend workflow state and what the AI platform needed.</li>
+      <li><strong>Action:</strong> Defined the integration scope (what we adopt, what we wrap, what we reject). Built the SDK adapter layer so the rest of the team could consume it without knowing Orkes specifics. Drove the config model so multi-tenant boundaries were clean.</li>
+      <li><strong>Result:</strong> Workflows can now span backend and AI systems through one runtime. The team adopted it because I made the integration easier to use than the alternative, not because I mandated it.</li>
     </ul>
-    <p class="use"><strong>Use for:</strong> "Tell me about influencing without authority" · "Tell me about picking up a problem" · "Tell me about a change you drove"</p>
+    <p class="use"><strong>Use for:</strong> "Tell me about a third-party integration" · "Tell me about adopting a new technology" · "Tell me about a time you wrapped an external dependency"</p>
+  </div>
+
+  <div class="story">
+    <h3><span class="tag">SCALE / CORPORATE DELIVERY</span> Story 5: Rakuten — high-volume payments at scale</h3>
+    <p><strong>Resume source:</strong> "Designed high-volume payment batch processing systems and APIs, enabling seamless third-party integrations across multiple Rakuten brands. Built a Java-based mock server framework to simulate external payment providers, improving integration test coverage and reliability."</p>
+    <p><strong>Why this matters:</strong> This is the bridge between your founding-engineer mode and your Staff-mode org work. The bullet understates what you actually did. In a leadership round, this story proves you can also ship inside a large corporate environment — batch APIs, third-party integrations, multi-brand systems, the boring reliability work that nobody celebrates.</p>
+    <p><strong>The story (beats):</strong></p>
+    <ul class="tight">
+      <li><strong>Situation:</strong> Rakuten runs multiple consumer brands, each of which has its own payment flows and third-party integrations. The batch payment system was the shared substrate — high-volume, multi-brand, with hard correctness requirements because money is involved.</li>
+      <li><strong>Task:</strong> Design and ship the batch processing systems and the APIs that third parties integrate against. Reliability and correctness are non-negotiable.</li>
+      <li><strong>Action — the two big calls:</strong>
+        <ul class="tight">
+          <li><strong>Batch design:</strong> How do you parallelize without double-processing? Where are the idempotency keys? What's the recovery story when a batch half-fails? Picked the boundaries, wrote the design, drove the review.</li>
+          <li><strong>The mock-server framework:</strong> The harder long-term call. Real third-party payment providers are flaky, rate-limited, expensive to test against. I built a Java mock-server framework so the team could run realistic integration tests without depending on the real providers. This is the Staff move — solving the team's testing problem, not just your own.</li>
+        </ul>
+      </li>
+      <li><strong>Result:</strong> Multi-brand batch payments running reliably. The mock framework became a shared asset that the whole org could use. Integration test coverage went up because the testing surface was no longer a blocker.</li>
+    </ul>
+    <p class="use"><strong>Use for:</strong> "Tell me about a time you built something the team / org used" · "Tell me about reliability in a high-stakes domain" · "Tell me about a corporate-scale system" · "Tell me about a time you unblocked the team's velocity" (the mock server is the literal answer to this)</p>
   </div>
 </section>
 
@@ -111,12 +144,12 @@
 
   <h3>2. "Tell me about a time you disagreed with a senior engineer / manager."</h3>
   <p><strong>Frame:</strong> The disagreement is the surface. They want to see how you held your position, what artifact you produced, and what happened.</p>
-  <p><strong>Pick from your work:</strong> Most likely Story 1 (Orkes) or Story 2 (perf), depending on what you actually lived through. Be ready to name the technical point of disagreement concretely (e.g. "I thought we should keep the engine per-tenant because [reasoning], the senior engineer wanted shared because [reasoning]").</p>
+  <p><strong>Pick from your work:</strong> Podeum is rich for this — small team, no manager to defer to, you probably had to push back on product scope, infra choices, or timeline. The point: you had to be right under pressure with no safety net. Or pick Walmart Story 3 (multi-tenant) — design disagreement on a real system.</p>
   <p><strong>Close with:</strong> "I ended up [conceding / persuading / splitting the difference]. I learned [one thing about how decisions get made here]."</p>
 
   <h3>3. "Tell me about a time you failed / a mistake you made."</h3>
   <p><strong>Frame:</strong> Real failure, real consequence, real learning. Not a humble-brag ("I worked too hard").</p>
-  <p><strong>Pick from your work:</strong> Something with a real consequence, not a paper cut. If nothing obvious comes to mind, look at Podeum (early-stage startup, decisions had to be made fast, some didn't work), or any design choice that got rolled back.</p>
+  <p><strong>Pick from your work:</strong> Podeum is the highest-stakes place to look — early-stage startup, decisions had to be made fast, some didn't work. Maybe an architecture call you made that didn't scale, or a product scope call that the team paid for. Be specific. Real consequence beats hypothetical any day.</p>
   <p><strong>Close with:</strong> The behavior change you made, not the lesson you "learned." (Lessons are cheap; behavior change is what costs.)</p>
 
   <h3>4. "Where do you want to be in 2-3 years and why this role?"</h3>
@@ -125,12 +158,12 @@
   <ul>
     <li><strong>Trajectory:</strong> "I want to be the engineer who sets the technical direction for a platform area, not just the engineer who executes it. Staff-level work — defining the architecture, aligning 3-4 teams, owning the SLOs across the surface."</li>
     <li><strong>Why this role:</strong> Tie to something specific they said in the job description or that you learned in earlier rounds. "Your [specific system / scale / team structure] is the kind of environment where that scope is the default."</li>
-    <li><strong>Why now:</strong> "I've been at Walmart two years, the work has gone well, and the next move I want is one where I get the cross-team scope as the expectation, not a thing I have to negotiate for."</li>
+    <li><strong>Why now:</strong> "I've been at Walmart two years, the work has gone well, and the next move I want is one where I get the cross-team scope as the default, not a thing I have to negotiate for."</li>
   </ul>
 
   <h3>5. "Tell me about a time you influenced without authority."</h3>
   <p><strong>Frame:</strong> Artifact, not charisma. "I got people to do X" is not influence. "I wrote a doc / ran a review / built a prototype that made the decision obvious" is.</p>
-  <p><strong>Best fit from your resume:</strong> Story 2 (perf) — you wrote the doc, aligned the DB team and infra team, made the changes land. Or Story 4 (dev tooling) — you made the new workflow easy to try, didn't mandate it.</p>
+  <p><strong>Best fit from your resume:</strong> Story 2 (perf) — you wrote the doc, aligned the DB team and infra team, made the changes land. Or Story 5 (Rakuten mock server) — you built the framework the whole team/org could use, didn't mandate it.</p>
 </section>
 
 <section>
@@ -138,7 +171,7 @@
   <ul>
     <li><span class="danger">"I told them what to do and they did it"</span> — that's an IC, not Staff. Influence is by artifact and alignment, not position.</li>
     <li><span class="danger">"We" with no "I"</span> — Staff-level candidates name their specific contribution. "I led the design" / "I wrote the doc" / "I drove the alignment."</li>
-    <li><span class="danger">Vague numbers</span> — "improved performance" is bad. "~200ms to ~130ms p95" is good. Have 2-3 hard numbers memorized.</li>
+    <li><span class="danger">Vague numbers</span> — "improved performance" is bad. "~200ms to ~130ms p95" is good. "0 to ~10k DAU" is good. Have 2-3 hard numbers memorized.</li>
     <li><span class="danger">Blaming the org / manager / team</span> — "my manager didn't give me scope" is a red flag. "I picked the next scope myself" is the right frame.</li>
     <li><span class="danger">Humble-bragging</span> — "I work too hard" / "I care too much" / "I'm too much of a perfectionist" are universally mocked. Real weakness, real work you're doing on it.</li>
   </ul>
@@ -147,14 +180,15 @@
 <section>
   <h2>60-90 minute drill plan (start now)</h2>
   <ol>
-    <li><strong>15 min:</strong> Read the 4 stories above. Pick your strongest one for each of the 5 question types. Don't memorize prose — write 5 bullets per story on a single page.</li>
-    <li><strong>20 min:</strong> Practice "why still SE3" out loud, twice. This is the question that will trip you up if you don't drill it.</li>
-    <li><strong>15 min:</strong> Practice "where do you want to be" out loud, twice.</li>
-    <li><strong>15 min:</strong> Practice each of the 4 stories out loud, in 90 seconds each. Time yourself. If you run over, you're getting into detail the interviewer doesn't need.</li>
+    <li><strong>10 min:</strong> Read the 5 stories above. Pick your strongest one for each of the 5 question types. Write 5 bullets per story on a single page. Don't memorize prose.</li>
+    <li><strong>15 min:</strong> Practice Story 1 (Podeum) out loud, three times. This is your lead — it has to be tight. 90 seconds max. If you run over, you're in detail the interviewer doesn't need.</li>
+    <li><strong>10 min:</strong> Practice "why still SE3" out loud, twice. This is the question that will trip you up if you don't drill it.</li>
+    <li><strong>10 min:</strong> Practice "where do you want to be" out loud, twice.</li>
+    <li><strong>10 min:</strong> Practice Stories 2-5 out loud, 90 seconds each.</li>
     <li><strong>10 min:</strong> Have your "real weakness" answer ready. One sentence for the weakness, one sentence for the work you're doing on it.</li>
     <li><strong>10 min:</strong> Glance at the company's recent news / product. One concrete thing you noticed will land well in the "why this role" answer.</li>
   </ol>
-  <p class="anchor-tip">Total: ~85 min. The "out loud" parts are the only ones that matter. Reading is prep, speaking is the actual practice.</p>
+  <p class="anchor-tip">Total: ~75 min. The "out loud" parts are the only ones that matter. Reading is prep, speaking is the actual practice.</p>
 </section>
 
 <section>
@@ -168,7 +202,7 @@
 
 <footer class="lesson-footer">
   <p>Leadership Round Quick Prep · Built from resume at ~/Desktop/dev/resume/abhigyan_resume.tex</p>
-  <p>No personal projects used. All stories drawn from Walmart, Rakuten, Podeum bullets.</p>
+  <p>No personal projects used. All 5 stories drawn from Podeum, Walmart, Rakuten bullets. Podeum is the lead for end-to-end ownership.</p>
 </footer>
 </main>
 </body>
