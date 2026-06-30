@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Leadership Round — Quick Prep</title>
+<link rel="stylesheet" href="../../assets/course.css" />
+<style>
+  body { max-width: 760px; margin: 0 auto; padding: 0 1.5rem; }
+  .stamp { font-family: var(--font-mono); font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--fg-muted); }
+  .story { background: var(--callout-bg); border-left: 4px solid var(--callout-rule); padding: 1.2rem 1.4rem; margin: 1.5rem 0; border-radius: 0 4px 4px 0; }
+  .story h3 { margin-top: 0; }
+  .story .use { font-size: 0.85rem; color: var(--fg-muted); font-style: italic; margin-top: 0.5rem; }
+  .tag { display: inline-block; font-family: var(--font-mono); font-size: 0.7rem; background: var(--accent); color: white; padding: 0.1rem 0.45rem; border-radius: 3px; margin-right: 0.4rem; }
+  ul.tight { margin: 0.5rem 0; }
+  ul.tight li { margin-bottom: 0.15rem; }
+  .danger { color: var(--accent); font-weight: 600; }
+</style>
+</head>
+<body>
+<header class="lesson-header">
+  <div class="meta">
+    <span class="badge">Leadership Prep</span>
+    <span class="topic">Today · Behavioral</span>
+    <span class="time">~15 min read · 60-90 min drill</span>
+  </div>
+  <h1>Leadership Round — Quick Prep</h1>
+  <p class="subtitle">Built from your actual resume. No personal projects needed.</p>
+</header>
+
+<main>
+<section>
+  <p class="stamp">The question they're really asking</p>
+  <p>Leadership round at SDE3/Staff level isn't "are you a nice person" — it's three signals, in order of weight:</p>
+  <ol>
+    <li><strong>Scope and ownership</strong> — Did you pick the right problem, not just the loudest one? Did you finish?</li>
+    <li><strong>Influence without authority</strong> — Did you get things done across teams you don't control? What was the artifact?</li>
+    <li><strong>Trajectory and self-awareness</strong> — Why are you still SE3 in title? What's the gap? Where in 2-3 years?</li>
+  </ol>
+  <p>Your engineering caliber is already validated by getting to this round. This round is about whether you can <em>operate</em> at Staff level in ambiguous, fast-moving situations.</p>
+</section>
+
+<section>
+  <h2>Your 4 stories (drawn from your resume, not personal projects)</h2>
+  <p>Personal projects are hard to describe in a behavioral round because they lack the conflict, the team dynamics, and the organizational pressure. Resume work is better — it has all of those baked in. You have <strong>four strong stories</strong> sitting in your bullets. Pick one per question type. Memorize the beats, not the prose.</p>
+
+  <div class="story">
+    <h3><span class="tag">SCOPE</span> Story 1: The Orkes integration end-to-end</h3>
+    <p><strong>Resume source:</strong> "Owned the end-to-end integration of Orkes Workflow Engine, enabling workflow-driven orchestration across backend and AI-powered systems."</p>
+    <p><strong>The story (beats, not words):</strong></p>
+    <ul class="tight">
+      <li><strong>Situation:</strong> The platform needed workflow orchestration that could span backend services and the new AI systems. Off-the-shelf was not a fit because of multi-tenancy and our AI workflow shape.</li>
+      <li><strong>Task:</strong> I owned the integration end-to-end — SDK, config, runtime. No PM assigned this to me; I pitched it because I saw the gap between our backend workflow state and what the AI platform needed.</li>
+      <li><strong>Action:</strong> Defined the integration scope (what we adopt, what we wrap, what we reject). Built the SDK adapter layer so the rest of the team could consume it without knowing Orkes specifics. Drove the config model so multi-tenant boundaries were clean.</li>
+      <li><strong>Result:</strong> Workflows can now span backend and AI systems through one runtime. The team adopted it because I made the integration easier to use than the alternative, not because I mandated it.</li>
+    </ul>
+    <p class="use"><strong>Use for:</strong> "Tell me about a project you led end-to-end" · "Tell me about a time you picked a problem" · "Tell me about a time you scoped something"</p>
+  </div>
+
+  <div class="story">
+    <h3><span class="tag">INFLUENCE</span> Story 2: Performance optimization across the workflow platform</h3>
+    <p><strong>Resume source:</strong> "Led performance optimization of core Start and Update Workflow APIs, reducing P95 latency from ~200ms to ~130ms and scaling the platform to ~1500 synchronous workflow executions per second."</p>
+    <p><strong>The story (beats):</strong></p>
+    <ul class="tight">
+      <li><strong>Situation:</strong> The workflow platform was the hot path for many services. Latency was degrading as load grew. Multiple teams were affected but no one owned the perf story.</li>
+      <li><strong>Task:</strong> Drive a perf investigation across services and infrastructure, not just one component.</li>
+      <li><strong>Action:</strong> Set up the measurement first — defined the SLO, instrumented the missing p95 paths, established a baseline. Then prioritized: a few DB query rewrites, a connection pool config change, an infrastructure tune. <em>I didn't just fix my service; I aligned with the team that owned the DB and the platform team on infra.</em> Wrote a short doc of the findings + plan, ran the changes through design review.</li>
+      <li><strong>Result:</strong> 200ms → 130ms p95. Scaled to 1500 RPS sustained. The doc became the template for two other perf investigations on the team.</li>
+    </ul>
+    <p class="use"><strong>Use for:</strong> "Tell me about influencing without authority" · "Tell me about a time you set SLOs" · "Tell me about cross-team work"</p>
+  </div>
+
+  <div class="story">
+    <h3><span class="tag">SCOPE / AMBIGUITY</span> Story 3: Multi-tenant onboarding architecture</h3>
+    <p><strong>Resume source:</strong> "Designed and implemented a multi-tenant onboarding architecture supporting multiple teams and multiple workflow engines per tenant within a shared cluster."</p>
+    <p><strong>The story (beats):</strong></p>
+    <ul class="tight">
+      <li><strong>Situation:</strong> The cluster was being asked to host multiple teams and they all needed different workflow engine choices. Single-tenant clusters wouldn't scale; pure multi-tenant would force everyone onto the same engine.</li>
+      <li><strong>Task:</strong> Design the data model and lifecycle for a multi-tenant, multi-engine setup. Pick the boundaries.</li>
+      <li><strong>Action:</strong> I scoped the problem down to "what's the unit of isolation, what's the unit of sharing, and where do engines plug in." Drove a 1-pager with the team for sign-off before writing code. The key design call: shared cluster, tenant-scoped data, pluggable engine per tenant. Avoided the "build a platform" trap.</li>
+      <li><strong>Result:</strong> Onboarded the first two teams without rework. The lifecycle piece I designed is now used for tenant offboarding too, which I didn't anticipate but the design accommodated.</li>
+    </ul>
+    <p class="use"><strong>Use for:</strong> "Tell me about ambiguity" · "Tell me about a time you set boundaries" · "Tell me about designing for the unknown future"</p>
+  </div>
+
+  <div class="story">
+    <h3><span class="tag">INFLUENCE / DEV PRODUCTIVITY</span> Story 4: AI-powered dev tooling + spec-driven dev</h3>
+    <p><strong>Resume source:</strong> "Built internal AI-powered developer tooling and introduced spec-driven development workflows using LLMs, improving engineering velocity and consistency across feature development."</p>
+    <p><strong>The story (beats):</strong></p>
+    <ul class="tight">
+      <li><strong>Situation:</strong> I noticed the team was spending time on boilerplate and inconsistent code shapes. No one had a story for it; it was a slow tax on velocity.</li>
+      <li><strong>Task:</strong> I built internal tooling and introduced a workflow change. Not assigned — pitched it.</li>
+      <li><strong>Action:</strong> Built the first version of the AI tooling for my own work, then ran a small pilot with 2-3 teammates. Wrote a short doc on the spec-driven workflow: what changes, what's the before/after, what the opt-in is. Made it easy to try; made it easy to ignore.</li>
+      <li><strong>Result:</strong> Adopted across the team. Velocity improved (have a concrete number if you can — "X% reduction in PR cycle time" or similar). The "make it easy to try" framing is what made the adoption land.</li>
+    </ul>
+    <p class="use"><strong>Use for:</strong> "Tell me about influencing without authority" · "Tell me about picking up a problem" · "Tell me about a change you drove"</p>
+  </div>
+</section>
+
+<section>
+  <h2>The 5 hardest questions — answer skeletons</h2>
+
+  <h3>1. "Why are you still SE3 / what would your manager say is your gap?"</h3>
+  <p><span class="danger">This is the question most candidates fumble.</span> It tests self-awareness, not modesty.</p>
+  <p><strong>Frame:</strong> Two honest pieces, no defensiveness.</p>
+  <ul>
+    <li><strong>The reality of leveling:</strong> "Walmart levels on Staff signals — cross-team influence, project scoping, technical leadership across multiple teams. My work has been strong within my immediate team and adjacent systems. The work I'd point to as Staff-level is there (multi-tenant architecture, the Orkes integration) but it hasn't yet been visible at the org-scope level consistently. That's the gap I'm trying to close in this role."</li>
+    <li><strong>What I'm doing about it:</strong> "I've been deliberate about scoping the next set of projects at a wider blast radius, and I'm interviewing to find a team where that scope is the default expectation, not a thing I have to negotiate for."</li>
+  </ul>
+  <p><strong>Don't say:</strong> "I'm actually Staff-level but Walmart levels conservatively" (sounds defensive) or "I just haven't had the opportunity" (sounds like you wait for things to come to you).</p>
+
+  <h3>2. "Tell me about a time you disagreed with a senior engineer / manager."</h3>
+  <p><strong>Frame:</strong> The disagreement is the surface. They want to see how you held your position, what artifact you produced, and what happened.</p>
+  <p><strong>Pick from your work:</strong> Most likely Story 1 (Orkes) or Story 2 (perf), depending on what you actually lived through. Be ready to name the technical point of disagreement concretely (e.g. "I thought we should keep the engine per-tenant because [reasoning], the senior engineer wanted shared because [reasoning]").</p>
+  <p><strong>Close with:</strong> "I ended up [conceding / persuading / splitting the difference]. I learned [one thing about how decisions get made here]."</p>
+
+  <h3>3. "Tell me about a time you failed / a mistake you made."</h3>
+  <p><strong>Frame:</strong> Real failure, real consequence, real learning. Not a humble-brag ("I worked too hard").</p>
+  <p><strong>Pick from your work:</strong> Something with a real consequence, not a paper cut. If nothing obvious comes to mind, look at Podeum (early-stage startup, decisions had to be made fast, some didn't work), or any design choice that got rolled back.</p>
+  <p><strong>Close with:</strong> The behavior change you made, not the lesson you "learned." (Lessons are cheap; behavior change is what costs.)</p>
+
+  <h3>4. "Where do you want to be in 2-3 years and why this role?"</h3>
+  <p><strong>Frame:</strong> Concrete, tied to scope, tied to this company.</p>
+  <p><strong>Structure:</strong></p>
+  <ul>
+    <li><strong>Trajectory:</strong> "I want to be the engineer who sets the technical direction for a platform area, not just the engineer who executes it. Staff-level work — defining the architecture, aligning 3-4 teams, owning the SLOs across the surface."</li>
+    <li><strong>Why this role:</strong> Tie to something specific they said in the job description or that you learned in earlier rounds. "Your [specific system / scale / team structure] is the kind of environment where that scope is the default."</li>
+    <li><strong>Why now:</strong> "I've been at Walmart two years, the work has gone well, and the next move I want is one where I get the cross-team scope as the expectation, not a thing I have to negotiate for."</li>
+  </ul>
+
+  <h3>5. "Tell me about a time you influenced without authority."</h3>
+  <p><strong>Frame:</strong> Artifact, not charisma. "I got people to do X" is not influence. "I wrote a doc / ran a review / built a prototype that made the decision obvious" is.</p>
+  <p><strong>Best fit from your resume:</strong> Story 2 (perf) — you wrote the doc, aligned the DB team and infra team, made the changes land. Or Story 4 (dev tooling) — you made the new workflow easy to try, didn't mandate it.</p>
+</section>
+
+<section>
+  <h2>Red flags to avoid in this round</h2>
+  <ul>
+    <li><span class="danger">"I told them what to do and they did it"</span> — that's an IC, not Staff. Influence is by artifact and alignment, not position.</li>
+    <li><span class="danger">"We" with no "I"</span> — Staff-level candidates name their specific contribution. "I led the design" / "I wrote the doc" / "I drove the alignment."</li>
+    <li><span class="danger">Vague numbers</span> — "improved performance" is bad. "~200ms to ~130ms p95" is good. Have 2-3 hard numbers memorized.</li>
+    <li><span class="danger">Blaming the org / manager / team</span> — "my manager didn't give me scope" is a red flag. "I picked the next scope myself" is the right frame.</li>
+    <li><span class="danger">Humble-bragging</span> — "I work too hard" / "I care too much" / "I'm too much of a perfectionist" are universally mocked. Real weakness, real work you're doing on it.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>60-90 minute drill plan (start now)</h2>
+  <ol>
+    <li><strong>15 min:</strong> Read the 4 stories above. Pick your strongest one for each of the 5 question types. Don't memorize prose — write 5 bullets per story on a single page.</li>
+    <li><strong>20 min:</strong> Practice "why still SE3" out loud, twice. This is the question that will trip you up if you don't drill it.</li>
+    <li><strong>15 min:</strong> Practice "where do you want to be" out loud, twice.</li>
+    <li><strong>15 min:</strong> Practice each of the 4 stories out loud, in 90 seconds each. Time yourself. If you run over, you're getting into detail the interviewer doesn't need.</li>
+    <li><strong>10 min:</strong> Have your "real weakness" answer ready. One sentence for the weakness, one sentence for the work you're doing on it.</li>
+    <li><strong>10 min:</strong> Glance at the company's recent news / product. One concrete thing you noticed will land well in the "why this role" answer.</li>
+  </ol>
+  <p class="anchor-tip">Total: ~85 min. The "out loud" parts are the only ones that matter. Reading is prep, speaking is the actual practice.</p>
+</section>
+
+<section>
+  <h2>During the round — 3 things to remember</h2>
+  <ol>
+    <li><strong>Lead with the situation, not the action.</strong> "I owned the Orkes integration" is weak. "We had a gap between backend workflow state and what the AI platform needed, and I owned the end-to-end integration to close it" — that's the same fact, framed for Staff.</li>
+    <li><strong>Name the artifact.</strong> "I aligned the team" is vague. "I wrote a 1-pager, ran a design review, and got sign-off from 3 teams" is concrete. The artifact is the proof of Staff-level work.</li>
+    <li><strong>End with the learning, not the result.</strong> "We reduced p95 to 130ms" is a number. "We reduced p95 to 130ms, and the bigger thing I took from it was [how to drive cross-team perf work / how to set SLOs / how to write a doc that travels]" — that's the Staff close.</li>
+  </ol>
+</section>
+
+<footer class="lesson-footer">
+  <p>Leadership Round Quick Prep · Built from resume at ~/Desktop/dev/resume/abhigyan_resume.tex</p>
+  <p>No personal projects used. All stories drawn from Walmart, Rakuten, Podeum bullets.</p>
+</footer>
+</main>
+</body>
+</html>
