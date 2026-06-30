@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Lesson 0001 — Rate Limiter: The 45-Minute Narrative Spine</title>
+<link rel="stylesheet" href="../assets/course.css" />
+</head>
+<body>
+<header class="lesson-header">
+  <div class="meta">
+    <span class="badge">Lesson 0001</span>
+    <span class="topic">Rate Limiter · System Design</span>
+    <span class="time">~12 min</span>
+  </div>
+  <h1>The 45-Minute Narrative Spine</h1>
+  <p class="subtitle">Turn a topic you already know into a Staff-level interview performance.</p>
+</header>
+
+<nav class="toc">
+  <strong>On this page</strong>
+  <ol>
+    <li><a href="#why-this-lesson">Why this lesson exists</a></li>
+    <li><a href="#the-shape">The shape of a Staff answer</a></li>
+    <li><a href="#the-spine">The 5-act narrative spine</a></li>
+    <li><a href="#drive">Drive it: 45-min cold run</a></li>
+    <li><a href="#self-critique">Self-critique rubric</a></li>
+    <li><a href="#practice">Practice prompt (do this, don't just read)</a></li>
+    <li><a href="#debrief">Debrief with your agent</a></li>
+  </ol>
+</nav>
+
+<main>
+<section id="why-this-lesson">
+  <h2>Why this lesson exists</h2>
+  <p>You have written 317 lines on rate limiting and 904 more on the algorithms deep-dive. You know the material. The risk for SDE3/Staff is not knowledge — it is <strong>narration under time pressure, in front of a senior interviewer who will cut you off, redirect, and probe the soft parts.</strong></p>
+  <p>This lesson gives you a repeatable <em>narrative spine</em>: a script you can drop any system design topic into, so you spend your 45 minutes on the engineering, not on figuring out what to say next. You will drill it 3 times in week 1 (per your plan), so by the third run you have it cold.</p>
+  <p><strong>Source material:</strong> Your own vault at <code>system-design/rate-limiter.md</code> (317 lines) and <code>rate-limiting-algorithms-deep-dive.md</code> (904 lines). This lesson does not duplicate them — it points you at the right section at the right minute.</p>
+</section>
+
+<section id="the-shape">
+  <h2>The shape of a Staff answer</h2>
+  <p>A Staff-level system design answer is not "a long answer." It is a <strong>directed sequence of five acts</strong> with explicit transitions. The interviewer's job is to spot the act you're in and push you forward or sideways. Your job is to keep the act clear, move when it's done, and signal tradeoffs loudly so they can probe them.</p>
+
+  <table>
+    <thead>
+      <tr><th>Act</th><th>Minutes</th><th>What you produce</th><th>Signal you're done when</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>1. Frame</td><td>0–5</td><td>Requirements + non-goals + back-of-envelope numbers</td><td>Interviewer says "ok, design it" or nods</td></tr>
+      <tr><td>2. High-level</td><td>5–15</td><td>Boxes and arrows; client → gateway → limiter → service</td><td>Interviewer picks something to drill into</td></tr>
+      <tr><td>3. Deep dive (×2–3)</td><td>15–35</td><td>Pick 2–3 areas and go to API/algorithm/DS level</td><td>Interviewer pivots to a different concern</td></tr>
+      <tr><td>4. Cross-cutting</td><td>35–42</td><td>Failure modes, monitoring, observability, security</td><td>You have 3+ minutes left and no more questions</td></tr>
+      <tr><td>5. Tradeoffs + close</td><td>42–45</td><td>What you'd do differently with more time</td><td>"Thanks, that's it"</td></tr>
+    </tbody>
+  </table>
+
+  <p><strong>Why the time budget matters.</strong> The single most common failure mode in Staff loops is running out of time in act 3 with no breadth shown. The fix is to <em>land act 1 in under 5 minutes</em>. Most candidates spend 10–12 minutes asking clarifying questions. You have 5.</p>
+</section>
+
+<section id="the-spine">
+  <h2>The 5-act narrative spine, applied to rate limiting</h2>
+
+  <h3>Act 1 — Frame (0–5 min)</h3>
+  <p>Open with the problem class, then anchor with numbers. Talk while you write the requirement bullets on the whiteboard/screen. Use your <code>rate-limiter.md</code> "Summary & Interview Framing" section as the seed.</p>
+  <ul>
+    <li><strong>Problem class</strong>: "Rate limiting is admission control against a configured quota. Different from throttling (shape behavior) and load shedding (system-survival). I'll cover all three if time permits but the question is about rate limiting."</li>
+    <li><strong>Concrete ask</strong>: "Design a distributed rate limiter for an API gateway handling 500K RPS across 3 regions, per-user limits enforced globally, fault-tolerant."</li>
+    <li><strong>Back-of-envelope</strong>:
+      <ul>
+        <li>500K RPS / 3 regions ≈ 167K RPS per region</li>
+        <li>Assume 1B users, 100M daily actives, 1% of users generate 50% of traffic → 1M heavy users</li>
+        <li>Per-key state: ~50 bytes → 50 MB state in Redis for 1M active keys (trivial)</li>
+        <li>Latency target for limiter: p99 &lt; 5ms (must not be the bottleneck)</li>
+      </ul>
+    </li>
+    <li><strong>Non-goals</strong> (say these aloud): "Not designing the auth layer. Not designing the gateway routing. Not picking the cloud."</li>
+  </ul>
+  <p class="anchor-tip">Source: <code>system-design/rate-limiter.md</code> lines 14–22 (Summary), lines 24–36 (throttling vs rate limiting vs load shedding table).</p>
+
+  <h3>Act 2 — High-level (5–15 min)</h3>
+  <p>Draw boxes. Say each arrow aloud as you draw it. Aim for 6–8 boxes max — the interviewer should see the whole thing on one screen.</p>
+<pre class="diagram">
+   Client ──► API Gateway (anycast) ──► Limiter Service ──► Origin Service
+                                          │
+                                          ├─► Redis (state)
+                                          ├─► Config Service (limits, rules)
+                                          └─► Metrics Pipeline
+</pre>
+  <p>Call out the three things that make this Staff-level (not SDE2):</p>
+  <ol>
+    <li><strong>Limiter is a separate tier</strong>, not a library in the gateway. Why: independent scaling, independent deploy, can be shared across gateway fleets.</li>
+    <li><strong>State lives in Redis</strong> (or equivalent), not in-process. Why: in-process means per-pod state, so N pods each see 1/N traffic and the effective limit is N× configured.</li>
+    <li><strong>Config is hot-reloadable</strong>. Why: rate limits change faster than deploys. Ops needs to lower a limit at 2am without a release.</li>
+  </ol>
+  <p class="anchor-tip">Source: <code>system-design/rate-limiter.md</code> lines 168–227 (Architecture &amp; Deployment).</p>
+
+  <h3>Act 3 — Deep dive (15–35 min, pick 2–3)</h3>
+  <p>The interviewer's signal: "Tell me more about X" or "How does the limiter actually make the decision?" That's the cue to pick one of these three deep dives. <strong>You pick 2–3, not all</strong> — the trade is depth × 2 vs breadth × 4.</p>
+
+  <h4>Deep dive A: Algorithm choice (15 min)</h4>
+  <p>Open with the comparison table from your deep-dive article, then commit to one and justify.</p>
+  <table>
+    <thead><tr><th>Algorithm</th><th>Burst tolerance</th><th>Memory</th><th>Precision</th><th>When I'd pick it</th></tr></thead>
+    <tbody>
+      <tr><td>Token bucket</td><td>High (up to capacity)</td><td>O(1)</td><td>Smooth, lazy refill</td><td>Default for public APIs (AWS, Stripe)</td></tr>
+      <tr><td>Sliding window counter</td><td>Bounded</td><td>O(1)</td><td>Approximate</td><td>High-throughput prod, no burst surprise (Cloudflare)</td></tr>
+      <tr><td>Fixed window</td><td>2× burst at seam</td><td>O(1)</td><td>Counter</td><td>Trivial impl, low-stakes APIs</td></tr>
+      <tr><td>Sliding window log</td><td>Bounded</td><td>O(N)</td><td>Exact</td><td>Low-throughput, precision critical</td></tr>
+    </tbody>
+  </table>
+  <p><strong>Verbalize the choice:</strong> "I'd pick <em>token bucket with sliding window counter as a fallback for noisy-neighbor tenants.</em> Token bucket gives burst tolerance — important for legitimate clients that batch — and O(1) state. Sliding window counter fixes the 2× burst problem of fixed window. The combination is what Cloudflare and Stripe ship."</p>
+  <p>Walk the math once. Capacity = burst budget. Refill rate = sustained rate. Example: capacity 100, refill 10/sec → 100 burst, 10 RPS sustained.</p>
+  <p class="anchor-tip">Source: <code>system-design/rate-limiting-algorithms-deep-dive.md</code> lines 1–120 (algorithm walkthroughs), your main article lines 38–80 (comparison table).</p>
+
+  <h4>Deep dive B: Distributed correctness (10 min)</h4>
+  <p>The Staff question that breaks SDE2 candidates: "If you have 100 limiter pods and 1 Redis, what happens when Redis is slow or down?"</p>
+  <ul>
+    <li><strong>Happy path</strong>: Lua script in Redis does the read-modify-write atomically. p99 ~1–3ms.</li>
+    <li><strong>Redis slow</strong>: set a local fallback (e.g. token bucket in each pod) with a stricter limit. Trade: 100 pods × 1% of traffic each = strict local cap. Better than failing open and letting the origin drown.</li>
+    <li><strong>Redis down</strong>: fail open or fail closed. <strong>Verbalize the trade:</strong> "Fail open means a brief outage but no false rejections. Fail closed means correct limits but a self-inflicted DoS. For this product I'd fail open at the limiter and lean on the origin's own load shedding — the limiter is defense in depth, not the only line."</li>
+    <li><strong>Clock skew</strong>: don't rely on wall-clock tokens. Use Redis's monotonic <code>TIME</code> command or a centralized counter. Server clocks drift; tokens must be computed against a single source of time.</li>
+  </ul>
+  <p class="anchor-tip">Source: <code>system-design/rate-limiter.md</code> lines 168–227 (distributed considerations), lines 228–280 (failure modes).</p>
+
+  <h4>Deep dive C: Rule &amp; key design (10 min)</h4>
+  <p>Often missed. The hard part isn't the algorithm — it's <em>what to limit and how to identify the client</em>.</p>
+  <ul>
+    <li><strong>Key hierarchy</strong>: composite key <code>{tenant_id}:{api_key}:{route}:{client_ip}</code>. Different limits per route. Free tier gets 10 RPS, paid gets 1000 RPS, partner API gets 10K RPS — all on the same limiter.</li>
+    <li><strong>Header-based overrides</strong>: <code>X-Internal-Request: true</code> from internal services → skip limiter. Documented. <em>Staff move:</em> call out the security implication — that header is forgeable from outside if your ingress doesn't strip it. Mention mitigation: only honor the header when the request comes from a known internal mesh.</li>
+    <li><strong>Tenant fairness</strong>: a single big tenant shouldn't be able to evict other tenants' capacity. Use <em>weighted fair queuing</em> or per-tenant buckets at a higher tier.</li>
+  </ul>
+  <p class="anchor-tip">Source: <code>system-design/rate-limiter.md</code> lines 100–167 (keying, rule engine).</p>
+
+  <h3>Act 4 — Cross-cutting (35–42 min)</h3>
+  <p>Hit these in order, terse but explicit. The interviewer wants to see you think about the system, not just the limiter.</p>
+  <ul>
+    <li><strong>Observability</strong>: per-decision latency (allow/deny separately), per-rule hit rate, top-N denied clients, false-positive rate (sampled against origin's success metric). <em>Staff move:</em> "I would A/B the limiter in shadow mode for the first week — log decisions but don't act on them — and compare against origin health metrics before flipping the switch."</li>
+    <li><strong>Security</strong>: limiter is itself a target. An attacker who can poison the limiter can lock all users out (DoS) or unlock themselves (bypass). AuthN on the limiter control plane, mTLS for limiter→Redis, audit log of rule changes.</li>
+    <li><strong>Multi-region</strong>: regional Redis for low latency, async replication of rules to regional clusters, accept eventual consistency of counters within a few seconds (most rate limits tolerate it).</li>
+    <li><strong>Cost</strong>: at 500K RPS, every ms of Redis time is money. Lua script &lt; 1ms vs round-trip &gt; 5ms. Worth the complexity.</li>
+  </ul>
+  <p class="anchor-tip">Source: <code>system-design/rate-limiter.md</code> lines 281–317 (operational concerns).</p>
+
+  <h3>Act 5 — Tradeoffs + close (42–45 min)</h3>
+  <p>The "what would you do with more time" answer signals Staff-level self-awareness. Two or three concrete tradeoffs, not a vague "I would test more."</p>
+  <ul>
+    <li>"I'd move the limiter decision to the edge (Cloudflare Workers / Lambda@Edge) for the first 80% of traffic that's geographically static, keeping the central limiter for partner APIs and complex rule sets. Tradeoff: edge limits can't easily reach a shared Redis, so they're per-region and you accept some over-limit."</li>
+    <li>"I'd add a feedback loop from the origin's p99 back into the limiter. If origin p99 crosses 500ms, the limiter tightens automatically. This makes the limiter and load shedder cooperate instead of being independent."</li>
+    <li>"I'd consider moving from token bucket to hierarchical token bucket (HTB) if we add service-to-service limits, where each upstream service has its own sub-budget."</li>
+  </ul>
+  <p>Close with the time check: "I'm at about 43 minutes, want me to go deeper on any of these?" That hands control back cleanly and signals you know how to manage the clock.</p>
+</section>
+
+<section id="drive">
+  <h2>Drive it: 45-min cold run</h2>
+  <p>This is the practice. You do not read the next section. You set a 45-minute timer, open a blank doc or whiteboard, and drive the question cold. The narrative spine above is your reference — you can glance at it for the act transitions, but <strong>the words are yours</strong>.</p>
+  <p>After you finish, the self-critique rubric below is what you grade yourself against.</p>
+  <div class="callout">
+    <strong>Drill schedule (from your MISSION.md plan, week 1):</strong>
+    <ul>
+      <li>Run 1 (this week): expect to overrun into act 4 or stall in act 3. Goal is to find the gaps.</li>
+      <li>Run 2 (48 hrs later): smoother, hits all 5 acts, may run out of time on act 3 deep dives.</li>
+      <li>Run 3 (end of week 1): clean, time-budgeted, with one strong tradeoff in act 5.</li>
+    </ul>
+  </div>
+</section>
+
+<section id="self-critique">
+  <h2>Self-critique rubric (score yourself 0–2 on each)</h2>
+  <table>
+    <thead><tr><th>Criterion</th><th>0 (miss)</th><th>1 (partial)</th><th>2 (Staff-level)</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>Act 1 &lt; 5 min, with numbers</td>
+        <td>Took 10+ min, no numbers</td>
+        <td>Under 5 min but vague on numbers</td>
+        <td>&lt; 5 min, 4+ concrete numbers spoken aloud</td>
+      </tr>
+      <tr>
+        <td>Act 2 high-level in &lt; 10 min, with 3 Staff signals</td>
+        <td>Drew 12+ boxes, no narrative</td>
+        <td>Drew the diagram, named 1–2 tradeoffs</td>
+        <td>Drew the diagram, named separation of state/scaling/config</td>
+      </tr>
+      <tr>
+        <td>Act 3: 2–3 deep dives, each with tradeoffs</td>
+        <td>One shallow deep dive, no tradeoffs</td>
+        <td>Two dives, one with tradeoffs</td>
+        <td>2–3 dives, each with named alternatives + when to pick each</td>
+      </tr>
+      <tr>
+        <td>Act 4 hits observability, security, failure modes</td>
+        <td>Skipped entirely</td>
+        <td>One of the three</td>
+        <td>All three, terse and concrete (shadow mode, audit log, fail-open)</td>
+      </tr>
+      <tr>
+        <td>Act 5 has 2+ concrete tradeoffs, hands control back</td>
+        <td>Vague "I'd test more"</td>
+        <td>One concrete tradeoff</td>
+        <td>2–3 tradeoffs with named alternatives, time check at end</td>
+      </tr>
+      <tr>
+        <td>Verbalized the algorithm choice (not just "I'd use token bucket")</td>
+        <td>Picked, no reasoning</td>
+        <td>Picked, one-sentence reason</td>
+        <td>Picked, compared to ≥2 alternatives, named production users</td>
+      </tr>
+      <tr>
+        <td>Handled the "Redis is down" curveball</td>
+        <td>No answer</td>
+        <td>"Use local fallback"</td>
+        <td>Named fail-open vs fail-closed tradeoff, said which for this product, why</td>
+      </tr>
+    </tbody>
+  </table>
+  <p><strong>Target score: 12+/14.</strong> Anything below 10 = run again tomorrow. Anything 12+ on run 1 = you're already Staff-ready on this archetype.</p>
+</section>
+
+<section id="practice">
+  <h2>Practice prompt</h2>
+  <div class="callout">
+    <strong>Do this now, before the debrief.</strong>
+    <p>Set a 45-minute timer. Open a blank doc. Without re-reading this lesson, drive the question:</p>
+    <blockquote>"Design a distributed rate limiter for an API gateway handling 500K RPS across 3 regions, per-user limits enforced globally."</blockquote>
+    <p>Type or speak as if an interviewer is sitting across from you. When the timer hits 45:00, stop. Grade yourself against the rubric above. Note your weakest criterion.</p>
+  </div>
+  <p><em>You will do this 3 times in week 1 per your MISSION.md plan. The first run is for finding gaps. The third run is for confidence.</em></p>
+</section>
+
+<section id="debrief">
+  <h2>Debrief with your agent</h2>
+  <p>When you finish the run, tell me:</p>
+  <ol>
+    <li>What your total time was and where you overspent / underspent</li>
+    <li>Your rubric score (out of 14) and the weakest criterion</li>
+    <li>One specific moment where you stalled or got cut off</li>
+    <li>One specific tradeoff you verbalized that you're proud of</li>
+  </ol>
+  <p>I'll write a learning record capturing what you demonstrated, and we'll pick the next lesson from your ZPD. Likely candidates: the algorithm deep-dive (your <code>rate-limiting-algorithms-deep-dive.md</code> has 900 lines we haven't touched), the URL Shortener archetype (your <code>url-shortener.md</code>), or a coding-pattern refresh based on your weakest LeetCode pattern.</p>
+  <p><strong>Open the lesson in your browser with:</strong> <code>open ~/Desktop/dev/learn-sde3-staff/lessons/0001-rate-limiter-narrative-spine.html</code></p>
+</section>
+</main>
+
+<footer class="lesson-footer">
+  <p>Lesson 0001 · SDE3/Staff Interview Prep · MISSION.md</p>
+  <p>Built from your vault at <code>system-design/rate-limiter.md</code> and <code>rate-limiting-algorithms-deep-dive.md</code>. No source material modified.</p>
+</footer>
+</body>
+</html>
